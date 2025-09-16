@@ -14,7 +14,15 @@ export default function OnrampStatus({ order }: Props) {
     return <div className="text-red-600 text-sm">{error}</div>;
   }
 
-  if (status === "requires-kyc" || status === "polling-kyc") {
+  if (status === "polling-kyc") {
+    return (
+      <div className="border rounded p-4 text-sm text-gray-700">
+        Waiting for Persona verification... This can take a few moments.
+      </div>
+    );
+  }
+
+  if (status === "requires-kyc") {
     return (
       <div className="border rounded p-4">
         <div id="persona-container" />
