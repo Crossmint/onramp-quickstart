@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const CROSSMINT_API_KEY = process.env.CROSSMINT_API_KEY as string;
+const CROSSMINT_ENV = process.env.CROSSMINT_ENV || "staging"; // staging | production
+
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { orderId: string } }
+) {
+  try {
+    if (!CROSSMINT_API_KEY) {
+      return NextResponse.json(
+        { error: "Server misconfiguration: CROSSMINT_API_KEY missing" },
+        { status: 500 }
+      );
+    }
+
+    const { orderId } = params;
+    const response = await fetch(
+      `https://${CROSSMINT_ENV}.crossmint.com/api/2022-06-09/orders/${orderId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": CROSSMINT_API_KEY,
+        },
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data?.error || "Failed to fetch order", details: data },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: "Unexpected error fetching order", details: error?.message },
+      { status: 500 }
+    );
+  }
+}
+
+

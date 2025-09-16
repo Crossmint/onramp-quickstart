@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { EmbeddedAuthForm } from "@crossmint/client-sdk-react-ui";
+import Onramp from "@/components/onramp";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -134,7 +134,7 @@ export function LandingPage({ isLoading }: { isLoading: boolean }) {
           </div>
         ) : (
           <div className="w-full max-w-md bg-white rounded-3xl border shadow-lg overflow-hidden">
-            <EmbeddedAuthForm />
+            <Onramp />
           </div>
         )}
       </div>
