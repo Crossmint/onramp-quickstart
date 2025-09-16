@@ -22,11 +22,7 @@ export type CreateOrderResponse = {
   payment: {
     status: string;
     preparation: {
-      kyc?: {
-        templateId: string;
-        referenceId: string;
-        environmentId: string;
-      };
+      kyc?: PersonaConfig;
       checkoutcomPaymentSession?: string;
       checkoutcomPublicKey?: string;
     };
@@ -72,4 +68,10 @@ export type GetOrderResponse = {
 export type ApiErrorResponse = {
   error: string;
   details?: any;
+};
+
+export type PersonaConfig = {
+  templateId: string;
+  referenceId: string;
+  environmentId: string;
 };
