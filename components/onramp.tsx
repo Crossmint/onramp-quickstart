@@ -307,7 +307,7 @@ export default function Onramp() {
         )}
 
         {status === "success" && (
-          <div className="text-green-600">Payment successful. Tokens will arrive shortly.</div>
+          <div className="text-green-600">Tokens delivered.</div>
         )}
         {status === "payment-failed" && (
           <div className="text-red-600">Payment failed. Please try again.</div>
