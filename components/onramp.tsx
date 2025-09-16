@@ -6,7 +6,7 @@ import OnrampDeposit from "@/components/onramp-deposit";
 import RecipientInput from "@/components/recipient-input";
 import OnrampStatus from "@/components/onramp-status";
 
-const RETURNING_EMAIL = "quickstarts@crossmint.com";
+const RETURNING_EMAIL = "demos+onramp-existing-user@crossmint.com";
 const RETURNING_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
 const INITIAL_AMOUNT_USD = "5.00";
 
