@@ -54,9 +54,9 @@ export default function OnrampStatus({ order }: Props) {
         {txId && (
           <div className="mt-2">
             <a
-              href={`https://explorer.solana.com/tx/${txId}`}
+              href={`https://explorer.solana.com/tx/${txId}${process.env.CROSSMINT_ENV !== 'production' ? '?cluster=devnet' : ''}`}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer" 
               className="text-blue-600 hover:text-blue-800 underline text-sm"
             >
               View transaction on Solana Explorer
