@@ -20,14 +20,20 @@ declare global {
 }
 
 export default function Onramp() {
-  const [email, setEmail] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
-  const [amountUsd, setAmountUsd] = useState("2");
+  // Returning user presets
+  const RETURNING_EMAIL = "quickstarts@crossmint.com";
+  const RETURNING_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
+
+  const [email] = useState(RETURNING_EMAIL);
+  const [walletAddress] = useState(RETURNING_WALLET);
+  const [amountUsd, setAmountUsd] = useState("0");
   const [status, setStatus] = useState<string>("idle");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [personaConfig, setPersonaConfig] = useState<any | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
+  const [feeUsd, setFeeUsd] = useState<string | null>(null);
+  const [totalUsd, setTotalUsd] = useState<string | null>(null);
 
   // Track latest status to avoid TypeScript narrowings inside async callbacks
   const statusRef = useRef(status);
@@ -38,6 +44,8 @@ export default function Onramp() {
   const handleCreateOrder = useCallback(async () => {
     setError(null);
     setStatus("creating-order");
+    setFeeUsd(null);
+    setTotalUsd(null);
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,6 +64,16 @@ export default function Onramp() {
     }
     const createdOrderId = data.order?.orderId;
     setOrderId(createdOrderId ?? null);
+
+    // Extract fees and totals when available
+    try {
+      const order: any = (data as any)?.order;
+      const lineItem = Array.isArray(order?.lineItems) ? order.lineItems[0] : null;
+      const fee = lineItem?.quote?.charges?.unit?.amount;
+      const total = order?.quote?.totalPrice?.amount ?? lineItem?.quote?.totalPrice?.amount;
+      if (fee) setFeeUsd(String(fee));
+      if (total) setTotalUsd(String(total));
+    } catch {}
 
     const paymentStatus = data.order?.payment?.status;
     if (paymentStatus === "requires-kyc") {
@@ -171,42 +189,58 @@ export default function Onramp() {
   return (
     <div className="p-6">
       <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-600">Receipt email</span>
-          <input
-            className="border rounded px-3 py-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="user@example.com"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-600">Recipient wallet address</span>
-          <input
-            className="border rounded px-3 py-2"
-            value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
-            placeholder="Solana wallet address"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-600">Amount (USD)</span>
-          <input
-            className="border rounded px-3 py-2"
-            type="number"
-            min={1}
-            step={1}
-            value={amountUsd}
-            onChange={(e) => setAmountUsd(e.target.value)}
-          />
-        </label>
-        <button
-          className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
-          onClick={handleCreateOrder}
-          disabled={status === "creating-order"}
-        >
-          {status === "creating-order" ? "Creating order..." : "Start onramp"}
-        </button>
+        {/* Tabs header (Returning user only) */}
+        <div className="flex items-center gap-2 rounded border px-2 py-1 w-fit">
+          <button className="bg-gray-100 text-gray-900 rounded px-4 py-2 text-sm font-medium cursor-default">
+            Returning user
+          </button>
+          <button className="rounded px-4 py-2 text-sm text-gray-500 cursor-not-allowed" disabled>
+            New user (KYC)
+          </button>
+        </div>
+
+        {/* Deposit card */}
+        <div className="border rounded p-6">
+          <h2 className="text-lg font-semibold text-center">Deposit</h2>
+          <div className="mt-4 flex flex-col items-center">
+            <div className="text-sm text-gray-500">$</div>
+            <input
+              className="text-5xl font-semibold text-gray-800 text-center outline-none w-full max-w-[240px]"
+              type="number"
+              min={0}
+              step={1}
+              value={amountUsd}
+              onChange={(e) => setAmountUsd(e.target.value)}
+            />
+          </div>
+
+          {feeUsd !== null && totalUsd !== null && (
+            <div className="mt-6 grid grid-cols-2 gap-y-2 text-sm">
+              <div className="text-gray-600">Added to your balance</div>
+              <div className="text-right">${(
+                parseFloat(totalUsd) - parseFloat(feeUsd)
+              ).toFixed(2)}</div>
+              <div className="text-gray-600">Fees</div>
+              <div className="text-right">${parseFloat(feeUsd).toFixed(2)}</div>
+              <div className="text-gray-600">Total amount</div>
+              <div className="text-right font-medium">${parseFloat(totalUsd).toFixed(2)}</div>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <button
+              className="bg-black text-white rounded px-4 py-2 w-full disabled:opacity-50"
+              onClick={handleCreateOrder}
+              disabled={status === "creating-order"}
+            >
+              {status === "creating-order"
+                ? "Creating order..."
+                : feeUsd !== null && totalUsd !== null
+                ? `Pay $ ${parseFloat(totalUsd).toFixed(2)}`
+                : "Continue"}
+            </button>
+          </div>
+        </div>
 
         {error && (
           <div className="text-red-600 text-sm">{error}</div>
