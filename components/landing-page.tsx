@@ -14,7 +14,7 @@ const features = [
     title: "Progressive onboarding",
     description:
       "Light kyc for up to $1,000 per year. See the checkout to explore no-KYC flows",
-    iconPath: "/log-in.svg",
+    iconPath: "/window.svg",
   },
   {
     title: "Observability",
