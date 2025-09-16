@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type CreateOrderResponse = {
   clientSecret?: string;
@@ -16,34 +16,7 @@ type CreateOrderResponse = {
 declare global {
   interface Window {
     Persona?: any;
-    Checkout?: any;
   }
-}
-
-function useScript(src: string) {
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    if (!src) return;
-    const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
-    if (existing) {
-      if (existing.getAttribute("data-loaded") === "true") setLoaded(true);
-      else existing.addEventListener("load", () => setLoaded(true));
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = () => {
-      script.setAttribute("data-loaded", "true");
-      setLoaded(true);
-    };
-    script.onerror = () => setLoaded(false);
-    document.body.appendChild(script);
-    return () => {
-      script.remove();
-    };
-  }, [src]);
-  return loaded;
 }
 
 export default function Onramp() {
@@ -56,8 +29,11 @@ export default function Onramp() {
   const [personaConfig, setPersonaConfig] = useState<any | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
 
-  const personaLoaded = useScript("https://cdn.withpersona.com/dist/persona-v5.2.0.js");
-  const checkoutLoaded = useScript("https://cdn.checkout.com/js/flow/latest/checkout.js");
+  // Track latest status to avoid TypeScript narrowings inside async callbacks
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const handleCreateOrder = useCallback(async () => {
     setError(null);
@@ -116,61 +92,81 @@ export default function Onramp() {
 
   useEffect(() => {
     if (status !== "requires-kyc") return;
-    if (!personaLoaded || !personaConfig) return;
+    if (!personaConfig) return;
     try {
-      const Persona = (window as any).Persona;
-      if (!Persona?.Client) return;
-      const client = new Persona.Client({
-        templateId: personaConfig?.templateId,
-        referenceId: personaConfig?.referenceId,
-        environmentId: personaConfig?.environmentId,
-        onReady: () => client.open(),
-        onComplete: () => {
-          // Poll until KYC completes to awaiting-payment
-          setStatus("polling-kyc");
-          const interval = setInterval(async () => {
-            await pollOrder();
-          }, 5000);
-          // Stop polling once payment is available
-          const stopWhenReady = setInterval(() => {
-            if (status === "awaiting-payment") {
-              clearInterval(interval);
-              clearInterval(stopWhenReady);
-            }
-          }, 1000);
-        },
-        onCancel: () => {},
-        onError: (e: any) => {
-          setError(String(e?.message || e));
-          setStatus("error");
-        },
-      });
+      (async () => {
+        const personaMod: any = await import("persona");
+        const PersonaClient = personaMod?.Client || personaMod?.default?.Client;
+        if (!PersonaClient) throw new Error("Persona Client not available");
+        const client = new PersonaClient({
+          templateId: personaConfig?.templateId,
+          referenceId: personaConfig?.referenceId,
+          environmentId: personaConfig?.environmentId,
+          onReady: () => client.open(),
+          onComplete: () => {
+            setStatus("polling-kyc");
+            const interval = setInterval(async () => {
+              await pollOrder();
+            }, 5000);
+            const stopWhenReady = setInterval(() => {
+              if (statusRef.current === "awaiting-payment") {
+                clearInterval(interval);
+                clearInterval(stopWhenReady);
+              }
+            }, 1000);
+          },
+          onCancel: () => {},
+          onError: (e: any) => {
+            setError(String(e?.message || e));
+            setStatus("error");
+          },
+        });
+      })();
     } catch (e: any) {
       setError(String(e?.message || e));
       setStatus("error");
     }
-  }, [personaLoaded, personaConfig, status, pollOrder]);
+  }, [personaConfig, status, pollOrder]);
 
   useEffect(() => {
     if (status !== "awaiting-payment") return;
-    if (!checkoutLoaded || !paymentConfig) return;
+    if (!paymentConfig) return;
     const { checkoutcomPaymentSession, checkoutcomPublicKey } = paymentConfig || {};
     if (!checkoutcomPaymentSession || !checkoutcomPublicKey) return;
-    try {
-      const Checkout = (window as any).Checkout;
-      if (!Checkout?.Flow) return;
-      const checkout = new Checkout.Flow({
-        publicKey: checkoutcomPublicKey,
-        paymentSession: checkoutcomPaymentSession,
-        onSuccess: () => setStatus("success"),
-        onFailure: () => setStatus("payment-failed"),
-      });
-      checkout.mount("#payment-container");
-    } catch (e: any) {
-      setError(String(e?.message || e));
-      setStatus("error");
-    }
-  }, [checkoutLoaded, paymentConfig, status]);
+    (async () => {
+      try {
+        const mod: any = await import("@checkout.com/checkout-web-components");
+        if (!mod?.loadCheckoutWebComponents) {
+          throw new Error("Checkout Web Components not available");
+        }
+        const checkout = await mod.loadCheckoutWebComponents({
+          publicKey: checkoutcomPublicKey,
+          paymentSession: checkoutcomPaymentSession,
+          environment: "sandbox",
+          locale: "en-US",
+          appearance: {
+            colorBorder: "#FFFFFF",
+            colorAction: "#060735",
+            borderRadius: ["8px", "50px"],
+          },
+          onReady: () => {},
+          onPaymentCompleted: (_component: unknown, paymentResponse: { id: string }) => {
+            setStatus("success");
+          },
+          onChange: (_component: { type: string; isValid: () => boolean }) => {},
+          onError: (_component: { type: string }, error: Error) => {
+            setError(`Payment error: ${error.message}`);
+          },
+        });
+        if (checkout?.create) {
+          checkout.create("flow").mount("#payment-container");
+        }
+      } catch (e: any) {
+        setError(String(e?.message || e));
+        setStatus("error");
+      }
+    })();
+  }, [paymentConfig, status]);
 
   return (
     <div className="p-6">
