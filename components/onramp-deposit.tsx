@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
+import { Order } from "@/lib/types";
 
 type Props = {
   amountUsd: string;
   setAmountUsd: (v: string) => void;
-  feeUsd: string | null;
-  totalUsd: string | null;
-  status: string;
+  order: Order;
   onContinue: () => void;
   children?: React.ReactNode;
 };
@@ -38,9 +37,7 @@ function PricingInfo({ feeUsd, totalUsd }: { feeUsd: string | null; totalUsd: st
 export default function OnrampDeposit({
   amountUsd,
   setAmountUsd,
-  feeUsd,
-  totalUsd,
-  status,
+  order,
   onContinue,
   children,
 }: Props) {
@@ -62,16 +59,16 @@ export default function OnrampDeposit({
         />
       </div>
 
-      <PricingInfo feeUsd={feeUsd} totalUsd={totalUsd} />
+      <PricingInfo feeUsd={order.feeUsd} totalUsd={order.totalUsd} />
 
-      {feeUsd == null && totalUsd == null && (
+      {order.feeUsd == null && order.totalUsd == null && (
         <div className="mt-6">
           <button
             className="bg-black text-white rounded px-4 py-2 w-full disabled:opacity-50"
             onClick={onContinue}
-            disabled={status === "creating-order"}
+            disabled={order.status === "creating-order"}
           >
-            {status === "creating-order" ? "Creating order..." : "Continue"}
+            {order.status === "creating-order" ? "Creating order..." : "Continue"}
           </button>
         </div>
       )}

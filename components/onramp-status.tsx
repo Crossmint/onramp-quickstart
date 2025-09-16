@@ -1,14 +1,15 @@
 "use client";
 
 import React from "react";
-import { OnrampStatus as StatusType } from "@/lib/useCrossmintOnramp";
+import { Order } from "@/lib/types";
 
 type Props = {
-  status: StatusType;
-  error: string | null;
+  order: Order;
 };
 
-export default function OnrampStatus({ status, error }: Props) {
+export default function OnrampStatus({ order }: Props) {
+  const { status, error, txId } = order;
+  
   if (error) {
     return <div className="text-red-600 text-sm">{error}</div>;
   }
@@ -47,7 +48,23 @@ export default function OnrampStatus({ status, error }: Props) {
   }
 
   if (status === "success") {
-    return <div className="text-green-600">Tokens delivered.</div>;
+    return (
+      <div className="text-green-600">
+        <div>Tokens delivered.</div>
+        {txId && (
+          <div className="mt-2">
+            <a
+              href={`https://explorer.solana.com/tx/${txId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline text-sm"
+            >
+              View transaction on Solana Explorer
+            </a>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (status === "payment-failed") {

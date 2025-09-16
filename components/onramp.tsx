@@ -8,16 +8,17 @@ import OnrampStatus from "@/components/onramp-status";
 
 const RETURNING_EMAIL = "quickstarts@crossmint.com";
 const RETURNING_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
+const INITIAL_AMOUNT_USD = "5.00";
 
 export default function Onramp() {
 
   const [activeTab, setActiveTab] = useState<"returning" | "new">("returning");
   const [email, setEmail] = useState(RETURNING_EMAIL);
   const [walletAddress, setWalletAddress] = useState(RETURNING_WALLET);
-  const [amountUsd, setAmountUsd] = useState("5.00");
+  const [amountUsd, setAmountUsd] = useState(INITIAL_AMOUNT_USD);
   const [newUserStep, setNewUserStep] = useState<"collect" | "deposit">("deposit");
 
-  const { status, error, feeUsd, totalUsd, createOrder, reset } = useCrossmintOnramp({
+  const { order, createOrder, reset } = useCrossmintOnramp({
     email,
     walletAddress,
   });
@@ -36,7 +37,7 @@ export default function Onramp() {
               setActiveTab("returning");
               setEmail(RETURNING_EMAIL);
               setWalletAddress(RETURNING_WALLET);
-              setAmountUsd("5");
+              setAmountUsd(INITIAL_AMOUNT_USD);
               setNewUserStep("deposit");
               reset();
             }}
@@ -51,7 +52,7 @@ export default function Onramp() {
               setActiveTab("new");
               setEmail("");
               setWalletAddress("");
-              setAmountUsd("5");
+              setAmountUsd(INITIAL_AMOUNT_USD);
               setNewUserStep("collect");
               reset();
             }}
@@ -82,14 +83,12 @@ export default function Onramp() {
           <OnrampDeposit
             amountUsd={amountUsd}
             setAmountUsd={setAmountUsd}
-            feeUsd={feeUsd}
-            totalUsd={totalUsd}
-            status={status}
+            order={order}
             onContinue={handleCreateOrder}
           />
         )}
 
-        <OnrampStatus status={status} error={error} />
+        <OnrampStatus order={order} />
       </div>
     </div>
   );
