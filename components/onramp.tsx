@@ -98,6 +98,10 @@ export default function Onramp() {
       return;
     }
     const paymentStatus = data?.payment?.status;
+    const orderPhase = data?.phase;
+    const deliveryStatus = Array.isArray(data?.lineItems)
+      ? data.lineItems[0]?.delivery?.status
+      : undefined;
     if (paymentStatus === "awaiting-payment") {
       setPaymentConfig(data?.payment?.preparation);
       setStatus("awaiting-payment");
@@ -105,6 +109,24 @@ export default function Onramp() {
       setStatus("rejected-kyc");
     } else if (paymentStatus === "manual-kyc") {
       setStatus("manual-kyc");
+    } else if (
+      paymentStatus === "succeeded" ||
+      paymentStatus === "success" ||
+      paymentStatus === "completed" ||
+      paymentStatus === "paid"
+    ) {
+      // Payment is done. If delivery is already completed, mark success. Otherwise, keep delivering.
+      if (orderPhase === "completed" || deliveryStatus === "completed") {
+        setStatus("success");
+      } else {
+        setStatus("delivering");
+      }
+    } else if (
+      paymentStatus === "failed" ||
+      paymentStatus === "declined" ||
+      paymentStatus === "payment-failed"
+    ) {
+      setStatus("payment-failed");
     }
   }, [orderId]);
 
@@ -169,7 +191,20 @@ export default function Onramp() {
           },
           onReady: () => {},
           onPaymentCompleted: (_component: unknown, paymentResponse: { id: string }) => {
-            setStatus("success");
+            // Start polling the order until backend confirms final status
+            setStatus("polling-payment");
+            const interval = setInterval(async () => {
+              await pollOrder();
+            }, 4000);
+            const stopWhenDone = setInterval(() => {
+              if (
+                statusRef.current === "success" ||
+                statusRef.current === "payment-failed"
+              ) {
+                clearInterval(interval);
+                clearInterval(stopWhenDone);
+              }
+            }, 1000);
           },
           onChange: (_component: { type: string; isValid: () => boolean }) => {},
           onError: (_component: { type: string }, error: Error) => {
@@ -227,7 +262,8 @@ export default function Onramp() {
             </div>
           )}
 
-          <div className="mt-6">
+          {feeUsd == null && totalUsd == null && (
+            <div className="mt-6">
             <button
               className="bg-black text-white rounded px-4 py-2 w-full disabled:opacity-50"
               onClick={handleCreateOrder}
@@ -235,11 +271,10 @@ export default function Onramp() {
             >
               {status === "creating-order"
                 ? "Creating order..."
-                : feeUsd !== null && totalUsd !== null
-                ? `Pay $ ${parseFloat(totalUsd).toFixed(2)}`
                 : "Continue"}
             </button>
           </div>
+          )}
         </div>
 
         {error && (
@@ -256,6 +291,18 @@ export default function Onramp() {
         {status === "awaiting-payment" && (
           <div className="border rounded p-4">
             <div id="payment-container" />
+          </div>
+        )}
+
+        {status === "polling-payment" && (
+          <div className="border rounded p-4 text-sm text-gray-700">
+            Finalizing your payment... This may take a few seconds.
+          </div>
+        )}
+
+        {status === "delivering" && (
+          <div className="border rounded p-4 text-sm text-gray-700">
+            Delivering tokens to your wallet... Hang tight.
           </div>
         )}
 
