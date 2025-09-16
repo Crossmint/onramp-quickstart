@@ -1,25 +1,31 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { EmbeddedAuthForm } from "@crossmint/client-sdk-react-ui";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const features = [
   {
-    title: "Launch Fast",
+    title: "Native integrations",
     description:
-      "Integrate auth, create wallets, sponsor gas, and enable token transfers with just a few lines of code. No blockchain experience needed.",
-    iconPath: "/rocket.svg",
+      "Embedded and headless flows that look and feel fully native to your app.",
+    iconPath: "/window.svg",
   },
   {
-    title: "Scale Big",
+    title: "Progressive onboarding",
     description:
-      "All the APIs you need to power onramping, activity tracking, staking and more. Built to grow with you.",
-    iconPath: "/trending-up.svg",
+      "Light kyc for up to $1,000 per year. See the checkout to explore no-KYC flows",
+    iconPath: "/log-in.svg",
   },
   {
-    title: "Protect Your Assets",
+    title: "Observability",
     description:
-      "Smart wallets with onchain 2FA, flexible recovery methods, and no vendor lock-in. Secure and ready for what’s next.",
+      "Dashboards, webhooks, and APIs to monitor activity in real time",
+    iconPath: "/globe.svg",
+  },
+  {
+    title: "Full chargeback protection",
+    description:
+      "Crossmint manages disputes and assumes chargeback risk",
     iconPath: "/shield-check.svg",
   },
 ];
@@ -58,18 +64,10 @@ export function LandingPage({ isLoading }: { isLoading: boolean }) {
         {/* Content */}
         <div className="relative z-10 flex flex-col gap-12 text-white">
           <div className="flex flex-col gap-4">
-            <h1 className="text-6xl font-bold">Crossmint Wallets</h1>
+            <h1 className="text-6xl font-bold">Onramp demo</h1>
             <p className="text-white/60 text-lg">
-              Get started with the Crossmint Wallets Quickstart.{" "}
-              <a
-                href="https://github.com/crossmint/wallets-quickstart"
-                style={{ color: "white" }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Clone this repo
-              </a>{" "}
-              and try it out in minutes!
+              Allow users to fund their wallets. Use this card to test the
+              flow <span className="underline decoration-white/50 underline-offset-4">4242 4242 4242 4242</span>
             </p>
           </div>
 
@@ -102,6 +100,28 @@ export function LandingPage({ isLoading }: { isLoading: boolean }) {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Footer actions */}
+          <div className="mt-2 flex items-center gap-8 text-white/80">
+            <a
+              href="https://www.crossmint.com/contact/sales"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-white/80 hover:text-white focus:text-white visited:text-white/80 active:text-white transition-colors"
+            >
+              <Image src="/file.svg" alt="Contact sales" width={18} height={18} />
+              <span>Contact sales</span>
+            </a>
+            <a
+              href="https://github.com/Crossmint/onramp-quickstart"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-white/80 hover:text-white focus:text-white visited:text-white/80 active:text-white transition-colors"
+            >
+              <Image src="/code.svg" alt="View code" width={18} height={18} />
+              <span>View code</span>
+            </a>
           </div>
         </div>
       </div>
