@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const CROSSMINT_API_KEY = process.env.CROSSMINT_API_KEY as string;
 const CROSSMINT_ENV = process.env.CROSSMINT_ENV || "staging"; // staging | production
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: { orderId: string } }
+  _req: Request,
+  context: any
 ) {
   try {
     if (!CROSSMINT_API_KEY) {
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const { orderId } = params;
+    const { orderId } = (context?.params as { orderId: string });
     const response = await fetch(
       `https://${CROSSMINT_ENV}.crossmint.com/api/2022-06-09/orders/${orderId}`,
       {
