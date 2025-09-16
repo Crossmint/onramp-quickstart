@@ -38,7 +38,6 @@ export function useCrossmintOnramp({
   const [feeUsd, setFeeUsd] = useState<string | null>(null);
   const [totalUsd, setTotalUsd] = useState<string | null>(null);
 
-  // Avoid stale closures in async callbacks
   const statusRef = useRef<OnrampStatus>(status);
   useEffect(() => {
     statusRef.current = status;
@@ -69,7 +68,6 @@ export function useCrossmintOnramp({
       const createdOrderId = data.order?.orderId;
       setOrderId(createdOrderId ?? null);
 
-      // Extract fees and totals when available
       try {
         const order: any = (data as any)?.order;
         const lineItem = Array.isArray(order?.lineItems) ? order.lineItems[0] : null;
@@ -145,7 +143,6 @@ export function useCrossmintOnramp({
     }
   }, [orderId]);
 
-  // Persona flow when required
   useEffect(() => {
     if (status !== "requires-kyc") return;
     if (!personaConfig) return;

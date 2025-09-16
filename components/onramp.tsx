@@ -14,7 +14,7 @@ export default function Onramp() {
   const [activeTab, setActiveTab] = useState<"returning" | "new">("returning");
   const [email, setEmail] = useState(RETURNING_EMAIL);
   const [walletAddress, setWalletAddress] = useState(RETURNING_WALLET);
-  const [amountUsd, setAmountUsd] = useState("5");
+  const [amountUsd, setAmountUsd] = useState("5.00");
   const [newUserStep, setNewUserStep] = useState<"collect" | "deposit">("deposit");
 
   const { status, error, feeUsd, totalUsd, createOrder, reset } = useCrossmintOnramp({
@@ -27,7 +27,6 @@ export default function Onramp() {
   return (
     <div className="p-6">
       <div className="flex flex-col gap-4">
-        {/* Tabs header (Returning user only) */}
         <div className="flex items-center gap-2 rounded border px-2 py-1 w-fit">
           <button
             className={`rounded px-4 py-2 text-sm font-medium ${
@@ -61,7 +60,6 @@ export default function Onramp() {
           </button>
         </div>
 
-        {/* Deposit card (tab-aware) */}
         {activeTab === "new" && newUserStep === "collect" ? (
           <>
             <RecipientInput

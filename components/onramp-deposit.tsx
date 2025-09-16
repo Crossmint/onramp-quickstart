@@ -9,8 +9,31 @@ type Props = {
   totalUsd: string | null;
   status: string;
   onContinue: () => void;
-  children?: React.ReactNode; // optional extra inputs (e.g., email/wallet)
+  children?: React.ReactNode;
 };
+
+function PricingInfo({ feeUsd, totalUsd }: { feeUsd: string | null; totalUsd: string | null }) {
+  if (feeUsd === null || totalUsd === null) return null;
+
+  return (
+    <div className="mt-6 bg-gray-50 rounded-lg p-4">
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 text-sm">Added to your balance</span>
+          <span className="text-gray-900 font-medium">${(parseFloat(totalUsd) - parseFloat(feeUsd)).toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 text-sm">Fees</span>
+          <span className="text-gray-900 font-medium">${parseFloat(feeUsd).toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+          <span className="text-gray-900 font-medium">Total amount</span>
+          <span className="text-gray-900 font-semibold text-lg">${parseFloat(totalUsd).toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OnrampDeposit({
   amountUsd,
@@ -39,18 +62,7 @@ export default function OnrampDeposit({
         />
       </div>
 
-      {feeUsd !== null && totalUsd !== null && (
-        <div className="mt-6 grid grid-cols-2 gap-y-2 text-sm">
-          <div className="text-gray-600">Added to your balance</div>
-          <div className="text-right">${(
-            parseFloat(totalUsd) - parseFloat(feeUsd)
-          ).toFixed(2)}</div>
-          <div className="text-gray-600">Fees</div>
-          <div className="text-right">${parseFloat(feeUsd).toFixed(2)}</div>
-          <div className="text-gray-600">Total amount</div>
-          <div className="text-right font-medium">${parseFloat(totalUsd).toFixed(2)}</div>
-        </div>
-      )}
+      <PricingInfo feeUsd={feeUsd} totalUsd={totalUsd} />
 
       {feeUsd == null && totalUsd == null && (
         <div className="mt-6">
