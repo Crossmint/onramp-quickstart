@@ -94,6 +94,16 @@ export function useCrossmintOnramp({
     [email, walletAddress]
   );
 
+  const reset = useCallback(() => {
+    setStatus("not-created");
+    setOrderId(null);
+    setError(null);
+    setPersonaConfig(null);
+    setPaymentConfig(null);
+    setFeeUsd(null);
+    setTotalUsd(null);
+  }, []);
+
   const pollOrder = useCallback(async () => {
     if (!orderId) return;
     const res = await fetch(`/api/orders/${orderId}`);
@@ -232,6 +242,7 @@ export function useCrossmintOnramp({
     feeUsd,
     totalUsd,
     createOrder,
+    reset,
   } as const;
 }
 
