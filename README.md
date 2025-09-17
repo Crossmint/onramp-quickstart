@@ -26,7 +26,7 @@ Create and fund a crypto wallet using Crossmint Onramp. This quickstart walks th
 ## Deploy
 Easily deploy the template to Vercel with the button below. You will need to set the required environment variables in the Vercel dashboard.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCrossmint%2Fonramp-quickstart&env=CROSSMINT_API_KEY,CROSSMINT_ENV)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCrossmint%2Fonramp-quickstart&env=CROSSMINT_SERVER_SIDE_API_KEY,CROSSMINT_ENV)
 
 ## Setup
 1. Clone the repository and navigate to the project folder:
@@ -52,9 +52,9 @@ cp .env.template .env
 
 4. Get a Crossmint server API key from [here](https://docs.crossmint.com/introduction/platform/api-keys/server-side) and add it to the `.env` file. Ensure it has the scopes: `orders.read` and `orders.create`. The following variables are used by the API routes in this project:
 ```bash
-CROSSMINT_API_KEY=your_server_api_key
+CROSSMINT_SERVER_SIDE_API_KEY=your_server_api_key
 
-# staging | production (defaults to staging if not set)
+# staging | production
 CROSSMINT_ENV=staging
 ```
 

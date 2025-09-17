@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CROSSMINT_API_KEY = process.env.CROSSMINT_API_KEY as string;
+const CROSSMINT_SERVER_SIDE_API_KEY = process.env.CROSSMINT_SERVER_SIDE_API_KEY as string;
 const CROSSMINT_ENV = process.env.CROSSMINT_ENV || "staging";
 const USDC_STAGING = "solana:4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 const USDC_PROD = "solana:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!CROSSMINT_API_KEY) {
+    if (!CROSSMINT_SERVER_SIDE_API_KEY) {
       return NextResponse.json(
-        { error: "Server misconfiguration: CROSSMINT_API_KEY missing" },
+        { error: "Server misconfiguration: CROSSMINT_SERVER_SIDE_API_KEY missing" },
         { status: 500 }
       );
     }
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": CROSSMINT_API_KEY,
+          "x-api-key": CROSSMINT_SERVER_SIDE_API_KEY,
         },
         body: JSON.stringify({
           lineItems: [
