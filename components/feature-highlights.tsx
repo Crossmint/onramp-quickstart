@@ -43,7 +43,7 @@ export default function FeatureHighlights() {
 
   return (
     <div
-      className="relative hidden lg:flex flex-col rounded-[20px] justify-center px-18 py-8 m-3 col-span-2"
+      className="relative hidden lg:flex flex-col rounded-[20px] justify-center px-12 py-8 m-3 col-span-2"
       style={{
         backgroundImage: `url('/grid-bg.png')`,
         backgroundSize: "cover",

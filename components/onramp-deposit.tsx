@@ -47,10 +47,10 @@ export default function OnrampDeposit({
 
       {children}
 
-      <div className="mt-4 flex flex-col items-center">
-        <div className="text-sm text-gray-500">$</div>
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <div className="text-5xl text-gray-500">$</div>
         <input
-          className="text-5xl font-semibold text-gray-800 text-center outline-none w-full max-w-[240px]"
+          className="text-5xl font-semibold text-gray-800 text-center outline-none max-w-[140px]"
           type="number"
           min={0}
           step={1}
@@ -64,7 +64,7 @@ export default function OnrampDeposit({
       {order.totalUsd == null && (
         <div className="mt-6">
           <button
-            className="bg-black text-white rounded px-4 py-2 w-full disabled:opacity-50"
+            className="bg-black text-white rounded-full px-5 py-2 text-sm w-full disabled:opacity-50"
             onClick={onContinue}
             disabled={order.status === "creating-order"}
           >
