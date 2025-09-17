@@ -103,6 +103,8 @@ export function useCrossmintOnramp({
     
     if (paymentStatus === "awaiting-payment") {
       setPaymentConfig(orderData.payment.preparation);
+      setCheckoutSession(orderData.payment.preparation.checkoutcomPaymentSession || null);
+      setCheckoutPublicKey(orderData.payment.preparation.checkoutcomPublicKey || null);
       setStatus("awaiting-payment");
     } else if (paymentStatus === "rejected-kyc") {
       setStatus("rejected-kyc");
@@ -122,37 +124,18 @@ export function useCrossmintOnramp({
     }
   }, [orderId]);
 
-  useEffect(() => {
-    if (status !== "requires-kyc" || !personaConfig) return;
-    
-    (async () => {
-      const personaMod: any = await import("persona");
-      const PersonaClient = personaMod.Client || personaMod.default.Client;
-      const client = new PersonaClient({
-        templateId: personaConfig.templateId,
-        referenceId: personaConfig.referenceId,
-        environmentId: personaConfig.environmentId,
-        onReady: () => client.open(),
-        onComplete: () => {
-          setStatus("polling-kyc");
-          const interval = setInterval(async () => {
-            await pollOrder();
-          }, 5000);
-          const stopWhenReady = setInterval(() => {
-            if (statusRef.current === "awaiting-payment") {
-              clearInterval(interval);
-              clearInterval(stopWhenReady);
-            }
-          }, 1000);
-        },
-        onCancel: () => {},
-        onError: (e: any) => {
-          setError(String(e.message || e));
-          setStatus("error");
-        },
-      });
-    })();
-  }, [personaConfig, status, pollOrder]);
+  const startKycPolling = useCallback(() => {
+    setStatus("polling-kyc");
+    const interval = setInterval(async () => {
+      await pollOrder();
+    }, 5000);
+    const stopWhenReady = setInterval(() => {
+      if (statusRef.current === "awaiting-payment") {
+        clearInterval(interval);
+        clearInterval(stopWhenReady);
+      }
+    }, 1000);
+  }, [pollOrder]);
 
   const startPaymentPolling = useCallback(() => {
     setStatus("polling-payment");
@@ -184,6 +167,12 @@ export function useCrossmintOnramp({
       publicKey: checkoutPublicKey,
       startPaymentPolling,
     },
+    persona: personaConfig
+      ? {
+          config: personaConfig,
+          startKycPolling,
+        }
+      : null,
   } as const;
 }
 

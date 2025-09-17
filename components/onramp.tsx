@@ -5,6 +5,7 @@ import { useCrossmintOnramp } from "@/lib/useCrossmintOnramp";
 import OnrampDeposit from "@/components/onramp-deposit";
 import OnrampStatus from "@/components/onramp-status";
 import CheckoutComEmbedded from "@/components/checkoutcom-embedded";
+import PersonaEmbedded from "@/components/persona-embedded";
 
 // This email corresponds to a user that has already passed KYC in Staging.
 // You can modify it to test the KYC flow (which this code already supports).
@@ -16,7 +17,7 @@ export default function Onramp() {
 
   const [amountUsd, setAmountUsd] = useState(INITIAL_AMOUNT_USD);
 
-  const { order, createOrder, checkout } = useCrossmintOnramp({
+  const { order, createOrder, checkout, persona } = useCrossmintOnramp({
     email: RETURNING_EMAIL,
     walletAddress: RETURNING_WALLET,
   });
@@ -44,6 +45,13 @@ export default function Onramp() {
         )}
 
         <OnrampStatus order={order} />
+
+        {order.status === "requires-kyc" && persona && (
+            <PersonaEmbedded
+              config={persona.config}
+              onComplete={persona.startKycPolling}
+            />
+        )}
       </div>
     </div>
   );
