@@ -14,7 +14,6 @@ const RETURNING_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
 const INITIAL_AMOUNT_USD = "5.00";
 
 export default function Onramp() {
-
   const [amountUsd, setAmountUsd] = useState(INITIAL_AMOUNT_USD);
 
   const { order, createOrder, checkout, persona } = useCrossmintOnramp({

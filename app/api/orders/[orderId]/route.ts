@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const CROSSMINT_API_KEY = process.env.CROSSMINT_API_KEY as string;
-const CROSSMINT_ENV = process.env.CROSSMINT_ENV || "staging"; // staging | production
+const CROSSMINT_ENV = process.env.CROSSMINT_ENV || "staging";
 
 export async function GET(
   _req: Request,

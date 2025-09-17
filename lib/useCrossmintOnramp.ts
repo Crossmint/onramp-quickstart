@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CreateOrderResponse, GetOrderResponse, ApiErrorResponse } from "./types";
+import { startPolling } from "./utils/poll";
+
+const POLLING_INTERVAL_MS = 4000;
 
 export type OnrampStatus =
   | "not-created"
@@ -30,7 +33,6 @@ export function useCrossmintOnramp({
   const [orderId, setOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [personaConfig, setPersonaConfig] = useState<any | null>(null);
-  const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
   const [totalUsd, setTotalUsd] = useState<string | null>(null);
   const [effectiveAmount, setEffectiveAmount] = useState<string | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
@@ -77,7 +79,6 @@ export function useCrossmintOnramp({
         setStatus("requires-kyc");
       } else if (paymentStatus === "awaiting-payment") {
         setStatus("awaiting-payment");
-        setPaymentConfig(orderData.order.payment.preparation);
         const prep = orderData.order.payment.preparation as any;
         setCheckoutSession(prep.checkoutcomPaymentSession || null);
         setCheckoutPublicKey(prep.checkoutcomPublicKey || null);
@@ -102,7 +103,6 @@ export function useCrossmintOnramp({
     const deliveryStatus = orderData.lineItems[0].delivery.status;
     
     if (paymentStatus === "awaiting-payment") {
-      setPaymentConfig(orderData.payment.preparation);
       setCheckoutSession(orderData.payment.preparation.checkoutcomPaymentSession || null);
       setCheckoutPublicKey(orderData.payment.preparation.checkoutcomPublicKey || null);
       setStatus("awaiting-payment");
@@ -126,31 +126,25 @@ export function useCrossmintOnramp({
 
   const startKycPolling = useCallback(() => {
     setStatus("polling-kyc");
-    const interval = setInterval(async () => {
-      await pollOrder();
-    }, 5000);
-    const stopWhenReady = setInterval(() => {
-      if (statusRef.current === "awaiting-payment") {
-        clearInterval(interval);
-        clearInterval(stopWhenReady);
-      }
-    }, 1000);
+    startPolling({
+      intervalMs: POLLING_INTERVAL_MS,
+      tick: async () => {
+        await pollOrder();
+      },
+      shouldStop: () => statusRef.current === "awaiting-payment",
+    });
   }, [pollOrder]);
 
   const startPaymentPolling = useCallback(() => {
     setStatus("polling-payment");
-    const interval = setInterval(async () => {
-      await pollOrder();
-    }, 4000);
-    const stopWhenDone = setInterval(() => {
-      if (
-        statusRef.current === "success" ||
-        statusRef.current === "payment-failed"
-      ) {
-        clearInterval(interval);
-        clearInterval(stopWhenDone);
-      }
-    }, 1000);
+    startPolling({
+      intervalMs: POLLING_INTERVAL_MS,
+      tick: async () => {
+        await pollOrder();
+      },
+      shouldStop: () =>
+        statusRef.current === "success" || statusRef.current === "payment-failed",
+    });
   }, [pollOrder]);
 
   return {
