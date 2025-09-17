@@ -42,7 +42,7 @@ export default function OnrampDeposit({
   children,
 }: Props) {
   return (
-    <div className="border rounded p-6">
+    <div className="px-6">
       <h2 className="text-lg font-semibold text-center">Deposit</h2>
 
       {children}
