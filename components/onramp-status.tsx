@@ -31,14 +31,6 @@ export default function OnrampStatus({ order }: Props) {
     );
   }
 
-  if (status === "awaiting-payment") {
-    return (
-      <div className="border rounded p-4">
-        <div id="payment-container" />
-      </div>
-    );
-  }
-
   if (status === "polling-payment") {
     return (
       <div className="border rounded p-4 text-sm text-gray-700">

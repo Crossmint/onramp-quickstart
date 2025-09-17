@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useCrossmintOnramp } from "@/lib/useCrossmintOnramp";
 import OnrampDeposit from "@/components/onramp-deposit";
 import OnrampStatus from "@/components/onramp-status";
+import CheckoutComEmbedded from "@/components/checkoutcom-embedded";
 
 // This email corresponds to a user that has already passed KYC in Staging.
 // You can modify it to test the KYC flow (which this code already supports).
@@ -15,7 +16,7 @@ export default function Onramp() {
 
   const [amountUsd, setAmountUsd] = useState(INITIAL_AMOUNT_USD);
 
-  const { order, createOrder } = useCrossmintOnramp({
+  const { order, createOrder, checkout } = useCrossmintOnramp({
     email: RETURNING_EMAIL,
     walletAddress: RETURNING_WALLET,
   });
@@ -31,6 +32,16 @@ export default function Onramp() {
           order={order}
           onContinue={handleCreateOrder}
         />
+
+        {order.status === "awaiting-payment" && checkout.session && checkout.publicKey && (
+          <div className="border rounded p-4">
+            <CheckoutComEmbedded
+              checkoutcomPaymentSession={checkout.session}
+              checkoutcomPublicKey={checkout.publicKey}
+              onPaymentCompleted={checkout.startPaymentPolling}
+            />
+          </div>
+        )}
 
         <OnrampStatus order={order} />
       </div>

@@ -34,6 +34,8 @@ export function useCrossmintOnramp({
   const [totalUsd, setTotalUsd] = useState<string | null>(null);
   const [effectiveAmount, setEffectiveAmount] = useState<string | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
+  const [checkoutSession, setCheckoutSession] = useState<any | null>(null);
+  const [checkoutPublicKey, setCheckoutPublicKey] = useState<string | null>(null);
 
   const statusRef = useRef<OnrampStatus>(status);
   useEffect(() => {
@@ -76,6 +78,9 @@ export function useCrossmintOnramp({
       } else if (paymentStatus === "awaiting-payment") {
         setStatus("awaiting-payment");
         setPaymentConfig(orderData.order.payment.preparation);
+        const prep = orderData.order.payment.preparation as any;
+        setCheckoutSession(prep.checkoutcomPaymentSession || null);
+        setCheckoutPublicKey(prep.checkoutcomPublicKey || null);
       } else {
         setStatus(paymentStatus as OnrampStatus);
       }
@@ -149,47 +154,21 @@ export function useCrossmintOnramp({
     })();
   }, [personaConfig, status, pollOrder]);
 
-  useEffect(() => {
-    if (status !== "awaiting-payment") return;
-    if (!paymentConfig) return;
-    const { checkoutcomPaymentSession, checkoutcomPublicKey } = paymentConfig;
-    
-    (async () => {
-      const mod: any = await import("@checkout.com/checkout-web-components");
-      const checkout = await mod.loadCheckoutWebComponents({
-        publicKey: checkoutcomPublicKey,
-        paymentSession: checkoutcomPaymentSession,
-        environment: "sandbox",
-        locale: "en-US",
-        appearance: {
-          colorBorder: "#FFFFFF",
-          colorAction: "#060735",
-          borderRadius: ["8px", "50px"],
-        },
-        onReady: () => {},
-        onPaymentCompleted: (_component: unknown, _paymentResponse: { id: string }) => {
-          setStatus("polling-payment");
-          const interval = setInterval(async () => {
-            await pollOrder();
-          }, 4000);
-          const stopWhenDone = setInterval(() => {
-            if (
-              statusRef.current === "success" ||
-              statusRef.current === "payment-failed"
-            ) {
-              clearInterval(interval);
-              clearInterval(stopWhenDone);
-            }
-          }, 1000);
-        },
-        onChange: (_component: { type: string; isValid: () => boolean }) => {},
-        onError: (_component: { type: string }, error: Error) => {
-          setError(`Payment error: ${error.message}`);
-        },
-      });
-      checkout.create("flow").mount("#payment-container");
-    })();
-  }, [paymentConfig, status, pollOrder]);
+  const startPaymentPolling = useCallback(() => {
+    setStatus("polling-payment");
+    const interval = setInterval(async () => {
+      await pollOrder();
+    }, 4000);
+    const stopWhenDone = setInterval(() => {
+      if (
+        statusRef.current === "success" ||
+        statusRef.current === "payment-failed"
+      ) {
+        clearInterval(interval);
+        clearInterval(stopWhenDone);
+      }
+    }, 1000);
+  }, [pollOrder]);
 
   return {
     order: {
@@ -200,6 +179,11 @@ export function useCrossmintOnramp({
       txId,
     },
     createOrder,
+    checkout: {
+      session: checkoutSession,
+      publicKey: checkoutPublicKey,
+      startPaymentPolling,
+    },
   } as const;
 }
 
