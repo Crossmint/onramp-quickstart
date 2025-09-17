@@ -112,7 +112,7 @@ export default function FeatureHighlights() {
             rel="noopener noreferrer"
             className="flex items-center gap-3 text-white/80 hover:text-white focus:text-white visited:text-white/80 active:text-white transition-colors"
           >
-            <Image src="/code.svg" alt="View code" width={18} height={18} />
+            <Image src="/github.svg" alt="View code" width={18} height={18} />
             <span>View code</span>
           </a>
         </div>
