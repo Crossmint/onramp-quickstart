@@ -15,13 +15,15 @@
 </div>
 
 ## Introduction
-Create and fund a crypto wallet using Crossmint Onramp. This quickstart walks through creating an order, completing KYC (Persona) when required, collecting payment via Checkout.com Flow, and tracking delivery to the recipient wallet.
+Create and fund a crypto wallet using Crossmint Onramp. This quickstart walks through creating an order, completing KYC (Persona) when required, collecting payment, and tracking delivery to the recipient wallet.
 
-**Learn how to:**
+### Key features
+- Accept fiat payments via credit and debit cards
 - Create an onramp order
 - Handle KYC via Persona when required
-- Collect payment with Checkout.com Web Components (Flow)
-- Track delivery status and show the resulting transaction id
+- Deliver funds directly to a buyer’s wallet
+- Manage the full order lifecycle with real-time status updates
+- Maintain full control over the UI and UX of your checkout flow
 
 ## Deploy
 Easily deploy the template to Vercel with the button below. You will need to set the required environment variables in the Vercel dashboard.

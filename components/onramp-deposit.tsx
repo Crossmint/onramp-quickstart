@@ -50,7 +50,7 @@ export default function OnrampDeposit({
       <div className="mt-4 flex items-center justify-center gap-2">
         <div className="text-5xl text-gray-500">$</div>
         <input
-          className="text-5xl font-semibold text-gray-800 text-center outline-none max-w-[140px]"
+          className="text-5xl font-semibold text-gray-800 text-center outline-none max-w-[160px]"
           type="number"
           min={0}
           step={1}
