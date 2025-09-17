@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 type PersonaConfig = {
   templateId: string;
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export default function PersonaEmbedded({ config, onComplete, onError }: Props) {
+  const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     let stop = false;
 
@@ -26,7 +27,10 @@ export default function PersonaEmbedded({ config, onComplete, onError }: Props) 
         templateId: config.templateId,
         referenceId: config.referenceId,
         environmentId: config.environmentId,
-        onReady: () => client.open(),
+        onReady: () => {
+          client.open();
+          setIsReady(true);
+        },
         onComplete: () => {
           onComplete();
         },
@@ -40,7 +44,12 @@ export default function PersonaEmbedded({ config, onComplete, onError }: Props) 
     };
   }, [config, onComplete, onError]);
 
-  return <div id="persona-container" />;
+  return (
+    <>
+      {!isReady && <div>Loading...</div>}
+      <div id="persona-container"/>
+    </>
+  );
 }
 
 

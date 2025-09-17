@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 type Props = {
   checkoutcomPaymentSession: any;
@@ -13,6 +13,7 @@ export default function CheckoutComEmbedded({
   checkoutcomPublicKey,
   onPaymentCompleted,
 }: Props) {
+  const [isReady, setIsReady] = useState(false);
   useEffect(() => {
     if (!checkoutcomPaymentSession || !checkoutcomPublicKey) return;
 
@@ -31,7 +32,7 @@ export default function CheckoutComEmbedded({
           colorAction: "#060735",
           borderRadius: ["8px", "50px"],
         },
-        onReady: () => {},
+        onReady: () => setIsReady(true),
         onPaymentCompleted: () => {
           onPaymentCompleted();
         },
@@ -46,7 +47,12 @@ export default function CheckoutComEmbedded({
     };
   }, [checkoutcomPaymentSession, checkoutcomPublicKey, onPaymentCompleted]);
 
-  return <div id="payment-container" />;
+  return (
+    <>
+      <div id="payment-container"/>
+      {!isReady && <div>Loading...</div>}
+    </>
+  );
 }
 
 
