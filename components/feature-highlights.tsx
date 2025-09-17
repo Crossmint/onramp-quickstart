@@ -62,8 +62,7 @@ export default function FeatureHighlights() {
         <div className="flex flex-col gap-4">
           <h1 className="text-6xl font-bold">Onramp demo</h1>
           <p className="text-white/60 text-lg">
-            Allow users to fund their wallets. Use this card to test the
-            flow <span className="underline decoration-white/50 underline-offset-4">4242 4242 4242 4242</span>
+            Allow users to fund their wallets with a native onramp experience.
           </p>
         </div>
 

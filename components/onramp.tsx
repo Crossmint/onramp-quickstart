@@ -35,6 +35,10 @@ export default function Onramp() {
 
         {order.status === "awaiting-payment" && checkout.session && checkout.publicKey && (
           <div className="border rounded p-4">
+            <div>
+              <p className="text-sm mt-2 text-center">Use this card to test the payment process:</p>
+              <p className="text-sm font-semibold filter-green text-center">4242 4242 4242 4242.</p>
+            </div>
             <CheckoutComEmbedded
               checkoutcomPaymentSession={checkout.session}
               checkoutcomPublicKey={checkout.publicKey}
