@@ -11,19 +11,19 @@ type Props = {
   children?: React.ReactNode;
 };
 
-function PricingInfo({ feeUsd, totalUsd }: { feeUsd: string | null; totalUsd: string | null }) {
-  if (feeUsd === null || totalUsd === null) return null;
+function PricingInfo({ effectiveAmount, totalUsd }: { effectiveAmount: string | null; totalUsd: string | null }) {
+  if (effectiveAmount === null || totalUsd === null) return null;
 
   return (
     <div className="mt-6 bg-gray-50 rounded-lg p-4">
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-600 text-sm">Added to your balance</span>
-          <span className="text-gray-900 font-medium">${(parseFloat(totalUsd) - parseFloat(feeUsd)).toFixed(2)}</span>
+          <span className="text-gray-900 font-medium">${parseFloat(effectiveAmount).toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600 text-sm">Fees</span>
-          <span className="text-gray-900 font-medium">${parseFloat(feeUsd).toFixed(2)}</span>
+          <span className="text-gray-900 font-medium">${(parseFloat(totalUsd) - parseFloat(effectiveAmount)).toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
           <span className="text-gray-900 font-medium">Total amount</span>
@@ -59,9 +59,9 @@ export default function OnrampDeposit({
         />
       </div>
 
-      <PricingInfo feeUsd={order.feeUsd} totalUsd={order.totalUsd} />
+      <PricingInfo effectiveAmount={order.effectiveAmount} totalUsd={order.totalUsd} />
 
-      {order.feeUsd == null && order.totalUsd == null && (
+      {order.totalUsd == null && (
         <div className="mt-6">
           <button
             className="bg-black text-white rounded px-4 py-2 w-full disabled:opacity-50"

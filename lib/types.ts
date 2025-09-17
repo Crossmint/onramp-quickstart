@@ -3,8 +3,8 @@ import { OnrampStatus } from "./useCrossmintOnramp";
 export type Order = {
   status: OnrampStatus;
   error: string | null;
-  feeUsd: string | null;
   totalUsd: string | null;
+  effectiveAmount: string | null;
   txId: string | null;
 };
 
@@ -29,13 +29,12 @@ export type CreateOrderResponse = {
   };
   lineItems: Array<{
     quote: {
-      charges: {
-        unit: {
-          amount: string;
-        };
-      };
       totalPrice: {
         amount: string;
+      };
+      quantityRange: {
+        lowerBound: string;
+        upperBound: string;
       };
     };
   }>;
@@ -58,6 +57,12 @@ export type GetOrderResponse = {
     };
   };
   lineItems: Array<{
+    quote?: {
+      quantityRange?: {
+        lowerBound?: string;
+        upperBound?: string;
+      };
+    };
     delivery: {
       status: string;
       txId: string;

@@ -31,8 +31,8 @@ export function useCrossmintOnramp({
   const [error, setError] = useState<string | null>(null);
   const [personaConfig, setPersonaConfig] = useState<any | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
-  const [feeUsd, setFeeUsd] = useState<string | null>(null);
   const [totalUsd, setTotalUsd] = useState<string | null>(null);
+  const [effectiveAmount, setEffectiveAmount] = useState<string | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
 
   const statusRef = useRef<OnrampStatus>(status);
@@ -42,10 +42,7 @@ export function useCrossmintOnramp({
 
   const createOrder = useCallback(
     async (amountUsd: string) => {
-      setError(null);
       setStatus("creating-order");
-      setFeeUsd(null);
-      setTotalUsd(null);
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,11 +63,11 @@ export function useCrossmintOnramp({
       const orderData = data as CreateOrderResponse;
       setOrderId(orderData.order.orderId);
 
-      const lineItem = orderData.order.lineItems[0];
-      const fee = lineItem.quote.charges.unit.amount;
       const total = orderData.order.quote.totalPrice.amount;
-      setFeeUsd(fee);
+      const lineItem = orderData.order.lineItems[0];
+      const effective = lineItem.quote.quantityRange.lowerBound;
       setTotalUsd(total);
+      setEffectiveAmount(effective);
 
       const paymentStatus = orderData.order.payment.status;
       if (paymentStatus === "requires-kyc") {
@@ -210,8 +207,8 @@ export function useCrossmintOnramp({
     order: {
       status,
       error,
-      feeUsd,
       totalUsd,
+      effectiveAmount,
       txId,
     },
     createOrder,
