@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
       receiptEmail,
       walletAddress,
       tokenLocator,
-      paymentMethod,
     } = body ?? {};
 
     const resolvedTokenLocator =
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
             },
           ],
           payment: {
-            method: paymentMethod || "checkoutcom-flow",
+            method: "checkoutcom-flow",
             receiptEmail,
           },
           recipient: {

@@ -50,7 +50,6 @@ export function useCrossmintOnramp({
           amount: amountUsd,
           receiptEmail: email,
           walletAddress,
-          paymentMethod: "checkoutcom-flow",
         }),
       });
       const data: CreateOrderResponse | ApiErrorResponse = await res.json();
@@ -85,7 +84,6 @@ export function useCrossmintOnramp({
   );
 
   const pollOrder = useCallback(async () => {
-    if (!orderId) return;
     const res = await fetch(`/api/orders/${orderId}`);
     const data: GetOrderResponse | ApiErrorResponse = await res.json();
     if (!res.ok) {
@@ -96,7 +94,6 @@ export function useCrossmintOnramp({
     
     const orderData = data as GetOrderResponse;
     const paymentStatus = orderData.payment.status;
-    const orderPhase = orderData.phase;
     const deliveryStatus = orderData.lineItems[0].delivery.status;
     
     if (paymentStatus === "awaiting-payment") {
@@ -106,31 +103,22 @@ export function useCrossmintOnramp({
       setStatus("rejected-kyc");
     } else if (paymentStatus === "manual-kyc") {
       setStatus("manual-kyc");
-    } else if (
-      paymentStatus === "succeeded" ||
-      paymentStatus === "success" ||
-      paymentStatus === "completed" ||
-      paymentStatus === "paid"
-    ) {
-      if (orderPhase === "completed" || deliveryStatus === "completed") {
+    } else if (paymentStatus === "completed") {
+      if (deliveryStatus === "completed") {
         setStatus("success");
+
         const txId = orderData.lineItems[0].delivery.txId;
-        if (txId) setTxId(txId);
+        setTxId(txId);
       } else {
         setStatus("delivering");
       }
-    } else if (
-      paymentStatus === "failed" ||
-      paymentStatus === "declined" ||
-      paymentStatus === "payment-failed"
-    ) {
+    } else if (paymentStatus === "failed") {
       setStatus("payment-failed");
     }
   }, [orderId]);
 
   useEffect(() => {
-    if (status !== "requires-kyc") return;
-    if (!personaConfig) return;
+    if (status !== "requires-kyc" || !personaConfig) return;
     
     (async () => {
       const personaMod: any = await import("persona");
