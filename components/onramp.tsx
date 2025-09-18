@@ -1,61 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
-import { useCrossmintOnramp } from "@/lib/useCrossmintOnramp";
+import CheckoutComEmbedded from "@/components/checkoutcom-embedded";
 import OnrampDeposit from "@/components/onramp-deposit";
 import OnrampStatus from "@/components/onramp-status";
-import CheckoutComEmbedded from "@/components/checkoutcom-embedded";
 import PersonaEmbedded from "@/components/persona-embedded";
+import UserTypeSelector from "@/components/user-type-selector";
+import { useCrossmintOnramp } from "@/lib/useCrossmintOnramp";
+import { useState } from "react";
 
-// This email corresponds to a user that has already passed KYC in Staging.
-// You can modify it to test the KYC flow (which this code already supports).
-const RETURNING_EMAIL = "demos+onramp-existing-user@crossmint.com";
-const RETURNING_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
+const USER_WALLET = "x4zyf8T6n6NVN3kBW6fmzBvNVAGuDE8mzmzqkSUUh3U";
 const INITIAL_AMOUNT_USD = "5.00";
 
 export default function Onramp() {
   const [amountUsd, setAmountUsd] = useState(INITIAL_AMOUNT_USD);
+  const [userType, setUserType] = useState<"returning" | "new">("returning");
+  const [activeEmail, setActiveEmail] = useState("demos+onramp-existing-user@crossmint.com");
 
-  const { order, createOrder, checkout, persona } = useCrossmintOnramp({
-    email: RETURNING_EMAIL,
-    walletAddress: RETURNING_WALLET,
+  const { order, createOrder, resetOrder, checkout, persona } = useCrossmintOnramp({
+    email: activeEmail,
+    walletAddress: USER_WALLET,
   });
 
   const handleCreateOrder = () => createOrder(amountUsd);
 
+  const handleUserTypeChange = (newUserType: "returning" | "new", email: string) => {
+    setUserType(newUserType);
+    setActiveEmail(email);
+    resetOrder();
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex flex-col gap-4">
-        <OnrampDeposit
-          amountUsd={amountUsd}
-          setAmountUsd={setAmountUsd}
-          order={order}
-          onContinue={handleCreateOrder}
+    <div className="flex items-center justify-center bg-gray-50 px-6 py-12 col-span-1 lg:col-span-3">
+      <div className="w-full max-w-md">
+        {/* User type selection - outside the main box */}
+        <UserTypeSelector
+          userType={userType}
+          onUserTypeChange={handleUserTypeChange}
         />
 
-        {order.status === "awaiting-payment" && checkout.session && checkout.publicKey && (
-          <div>
-            <div>
-              <p className="text-sm mt-2 text-center">Use this card to test the payment process:</p>
-              <p className="text-sm font-semibold filter-green text-center">4242 4242 4242 4242.</p>
+        {/* Main content box */}
+        <div className="bg-white rounded-3xl border shadow-lg overflow-hidden">
+          <div className="p-6">
+            <div className="flex flex-col gap-4">
+              <OnrampDeposit
+                amountUsd={amountUsd}
+                setAmountUsd={setAmountUsd}
+                order={order}
+                onContinue={handleCreateOrder}
+              />
+
+              {order.status === "awaiting-payment" && checkout.session && checkout.publicKey && (
+                <div>
+                  <div>
+                    <p className="text-sm mt-2 text-center">Use this card to test the payment process:</p>
+                    <p className="text-sm font-semibold filter-green text-center">4242 4242 4242 4242.</p>
+                  </div>
+                  <hr className="mt-4" />
+                  <CheckoutComEmbedded
+                    checkoutcomPaymentSession={checkout.session}
+                    checkoutcomPublicKey={checkout.publicKey}
+                    onPaymentCompleted={checkout.startPaymentPolling}
+                  />
+                </div>
+              )}
+
+              <OnrampStatus order={order} />
+
+              {order.status === "requires-kyc" && persona && (
+                  <PersonaEmbedded
+                    config={persona.config}
+                    onComplete={persona.startKycPolling}
+                  />
+              )}
             </div>
-            <hr className="mt-4" />
-            <CheckoutComEmbedded
-              checkoutcomPaymentSession={checkout.session}
-              checkoutcomPublicKey={checkout.publicKey}
-              onPaymentCompleted={checkout.startPaymentPolling}
-            />
           </div>
-        )}
-
-        <OnrampStatus order={order} />
-
-        {order.status === "requires-kyc" && persona && (
-            <PersonaEmbedded
-              config={persona.config}
-              onComplete={persona.startKycPolling}
-            />
-        )}
+        </div>
       </div>
     </div>
   );

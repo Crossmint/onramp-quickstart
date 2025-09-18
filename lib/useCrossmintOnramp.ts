@@ -147,6 +147,18 @@ export function useCrossmintOnramp({
     });
   }, [pollOrder]);
 
+  const resetOrder = useCallback(() => {
+    setStatus("not-created");
+    setOrderId(null);
+    setError(null);
+    setPersonaConfig(null);
+    setTotalUsd(null);
+    setEffectiveAmount(null);
+    setTxId(null);
+    setCheckoutSession(null);
+    setCheckoutPublicKey(null);
+  }, []);
+
   return {
     order: {
       status,
@@ -156,6 +168,7 @@ export function useCrossmintOnramp({
       txId,
     },
     createOrder,
+    resetOrder,
     checkout: {
       session: checkoutSession,
       publicKey: checkoutPublicKey,
