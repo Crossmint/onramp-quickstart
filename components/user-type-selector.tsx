@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Tooltip from "@/components/tooltip";
 
 // This email corresponds to a user that has already passed KYC in Staging.
-// You can modify it to test the KYC flow (which this code already supports).
 const RETURNING_EMAIL = "demos+onramp-existing-user@crossmint.com";
 
 interface UserTypeSelectorProps {
@@ -14,7 +14,6 @@ interface UserTypeSelectorProps {
 export default function UserTypeSelector({ userType, onUserTypeChange }: UserTypeSelectorProps) {
   const [newUserEmail, setNewUserEmail] = useState<string | null>(null);
 
-  // Generate a stable random email when switching to New user
   useEffect(() => {
     if (userType === "new" && !newUserEmail) {
       const randomPart = Math.random().toString(36).slice(2, 10);
@@ -25,7 +24,6 @@ export default function UserTypeSelector({ userType, onUserTypeChange }: UserTyp
   const handleUserTypeChange = (newUserType: "returning" | "new") => {
     if (userType !== newUserType) {
       if (newUserType === "new") {
-        // regenerate a new email if switching to new user
         const randomPart = Math.random().toString(36).slice(2, 10);
         const email = `demos+onramp-new-user-${randomPart}@crossmint.com`;
         setNewUserEmail(email);
@@ -38,22 +36,26 @@ export default function UserTypeSelector({ userType, onUserTypeChange }: UserTyp
 
   return (
     <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1 mb-4">
-      <button
-        className={`flex-1 px-4 py-2 rounded-lg text-sm text-center ${
-          userType === "returning" ? "bg-white shadow-sm" : "text-gray-600"
-        }`}
-        onClick={() => handleUserTypeChange("returning")}
-      >
-        Returning user
-      </button>
-      <button
-        className={`flex-1 px-4 py-2 rounded-lg text-sm text-center ${
-          userType === "new" ? "bg-white shadow-sm" : "text-gray-600"
-        }`}
-        onClick={() => handleUserTypeChange("new")}
-      >
-        New user (KYC)
-      </button>
+      <Tooltip content="Preview the flow for users who have already completed KYC" className="flex-1">
+        <button
+          className={`w-full px-4 py-2 rounded-lg text-sm text-center ${
+            userType === "returning" ? "bg-white shadow-sm" : "text-gray-600"
+          }`}
+          onClick={() => handleUserTypeChange("returning")}
+        >
+          Returning user
+        </button>
+      </Tooltip>
+      <Tooltip content="Preview the KYC flow for first-time users" className="flex-1">
+        <button
+          className={`w-full px-4 py-2 rounded-lg text-sm text-center ${
+            userType === "new" ? "bg-white shadow-sm" : "text-gray-600"
+          }`}
+          onClick={() => handleUserTypeChange("new")}
+        >
+          New user (KYC)
+        </button>
+      </Tooltip>
     </div>
   );
 }
