@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
 import { Order } from "@/lib/types";
 
 type Props = {
@@ -11,23 +12,76 @@ type Props = {
   children?: React.ReactNode;
 };
 
+function ZeroFeeTooltip() {
+  const [open, setOpen] = React.useState(false);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const ref = React.useRef<HTMLSpanElement | null>(null);
+
+  const handleEnter = () => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setCoords({
+      top: r.top - 8,
+      left: r.left + r.width / 2,
+    });
+    setOpen(true);
+  };
+
+  const handleLeave = () => setOpen(false);
+
+  return (
+    <>
+      <span
+        ref={ref}
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
+        className="text-xs w-5 h-5 inline-flex items-center justify-center rounded-full border border-gray-300 text-gray-600 cursor-default"
+        aria-label="No fees in staging. Contact sales to discuss rates for production."
+      >
+        ?
+      </span>
+      {open && coords && typeof window !== "undefined" &&
+        createPortal(
+          <div
+            role="tooltip"
+            className="fixed z-50 bg-gray-900 text-white text-sm rounded-lg shadow-lg px-4 py-3 max-w-xs leading-snug"
+            style={{ top: coords.top, left: coords.left, transform: "translate(-50%, -100%)" }}
+          >
+            <span>No fees in staging. </span>
+            <span className="underline">Contact sales</span>
+            <span> to discuss rates for production.</span>
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 function PricingInfo({ effectiveAmount, totalUsd }: { effectiveAmount: string | null; totalUsd: string | null }) {
   if (effectiveAmount === null || totalUsd === null) return null;
+
+  const addedToBalance = parseFloat(effectiveAmount);
+  const totalAmountUsd = parseFloat(totalUsd);
+  const feesUsd = totalAmountUsd - addedToBalance;
 
   return (
     <div className="mt-6 bg-gray-50 rounded-lg p-4">
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-600 text-sm">Added to your balance</span>
-          <span className="text-gray-900 font-medium">${parseFloat(effectiveAmount).toFixed(2)}</span>
+          <span className="text-gray-900 font-medium">${addedToBalance.toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600 text-sm">Fees</span>
-          <span className="text-gray-900 font-medium">${(parseFloat(totalUsd) - parseFloat(effectiveAmount)).toFixed(2)}</span>
+          <div className="flex items-center gap-2">
+            {feesUsd <= 0.01 && <ZeroFeeTooltip />}
+            <span className="text-gray-900 font-medium">${feesUsd.toFixed(2)}</span>
+          </div>
         </div>
         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
           <span className="text-gray-900 font-medium">Total amount</span>
-          <span className="text-gray-900 font-semibold text-lg">${parseFloat(totalUsd).toFixed(2)}</span>
+          <span className="text-gray-900 font-semibold text-lg">${totalAmountUsd.toFixed(2)}</span>
         </div>
       </div>
     </div>
