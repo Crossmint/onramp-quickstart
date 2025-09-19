@@ -20,10 +20,11 @@ export default function PersonaEmbedded({ config, onComplete, onError }: Props) 
     let stop = false;
 
     (async () => {
-      const personaMod: any = await import("persona");
       if (stop) return;
-      const PersonaClient = personaMod.Client || personaMod.default.Client;
-      const client = new PersonaClient({
+    
+      const { Client } = await import("persona");
+      
+      const client = new Client({
         templateId: config.templateId,
         referenceId: config.referenceId,
         environmentId: config.environmentId,

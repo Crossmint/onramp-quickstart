@@ -1,5 +1,6 @@
 "use client";
 
+import { loadCheckoutWebComponents } from "@checkout.com/checkout-web-components";
 import React, { useEffect, useState } from "react";
 
 type Props = {
@@ -20,9 +21,8 @@ export default function CheckoutComEmbedded({
     let stop = false;
 
     (async () => {
-      const mod: any = await import("@checkout.com/checkout-web-components");
       if (stop) return;
-      const checkout = await mod.loadCheckoutWebComponents({
+      const checkout = await loadCheckoutWebComponents({
         publicKey: checkoutcomPublicKey,
         paymentSession: checkoutcomPaymentSession,
         environment: "sandbox",
