@@ -31,7 +31,7 @@ export default function Onramp() {
 
   return (
     <div className="flex items-center justify-center bg-gray-50 px-6 py-12 col-span-1 lg:col-span-3">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mt-10">
         {/* User type selection - outside the main box */}
         <UserTypeSelector
           userType={userType}

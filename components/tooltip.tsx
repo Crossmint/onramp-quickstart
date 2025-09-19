@@ -12,7 +12,7 @@ interface TooltipProps {
 export default function Tooltip({ children, content, className = "" }: TooltipProps) {
   const [open, setOpen] = React.useState(false);
   const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = React.useRef<HTMLDivElement | null>(null);
 
   const handleEnter = () => {
     const el = ref.current;
