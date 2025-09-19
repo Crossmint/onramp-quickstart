@@ -66,12 +66,13 @@ export default function OnrampDeposit({
       <div className="mt-4 flex items-center justify-center gap-2">
         <div className="text-5xl text-gray-500">$</div>
         <input
-          className="text-5xl font-semibold text-gray-800 text-center outline-none max-w-[160px]"
+          className="text-5xl font-semibold text-gray-800 text-center outline-none min-w-[120px] max-w-[300px] w-auto"
           type="number"
           min={0}
           step={1}
           value={amountUsd}
           onChange={(e) => setAmountUsd(e.target.value)}
+          disabled={order.status !== "not-created"}
         />
       </div>
 
